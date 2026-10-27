@@ -18,7 +18,7 @@ class PreferencesDialog(Adw.PreferencesWindow):
         self.set_transient_for(parent_window)
         self.set_modal(True)
         self.set_title(_("settings_title"))
-        self.set_default_size(500, 480)
+        self.set_default_size(540, 500)
 
         self._build_ui()
 

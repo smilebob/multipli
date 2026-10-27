@@ -66,9 +66,13 @@ class PythagorasView(Gtk.Box):
         self.append(controls_box)
 
         # Cartouche de résultat / explication visuelle
+        info_clamp = Adw.Clamp()
+        info_clamp.set_maximum_size(600)
+        info_clamp.set_tightening_threshold(520)
+
         self.info_card = Adw.Bin()
-        self.info_card.set_margin_start(20)
-        self.info_card.set_margin_end(20)
+        self.info_card.set_margin_start(16)
+        self.info_card.set_margin_end(16)
         self.info_card.add_css_class("card")
 
         info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -88,7 +92,8 @@ class PythagorasView(Gtk.Box):
         info_box.append(self.calc_label)
         info_box.append(self.explanation_label)
         self.info_card.set_child(info_box)
-        self.append(self.info_card)
+        info_clamp.set_child(self.info_card)
+        self.append(info_clamp)
 
         # Grille scrollable
         scroll = Gtk.ScrolledWindow()

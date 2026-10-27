@@ -179,19 +179,33 @@ class GameView(Gtk.Box):
         self.progress_bar.set_fraction(0.0)
         self.append(self.progress_bar)
 
+        # Zone centrale déroulante et restreinte avec Adw.Clamp
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_vexpand(True)
+        scroll.set_hexpand(True)
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+
+        clamp = Adw.Clamp()
+        clamp.set_maximum_size(600)
+        clamp.set_tightening_threshold(520)
+
+        self.play_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        self.play_container.set_valign(Gtk.Align.CENTER)
+        self.play_container.set_margin_top(8)
+        self.play_container.set_margin_bottom(12)
+        self.play_container.set_margin_start(16)
+        self.play_container.set_margin_end(16)
+
         # Carte centrale du calcul
         calc_card = Adw.Bin()
         calc_card.add_css_class("card")
-        calc_card.set_margin_top(12)
-        calc_card.set_margin_bottom(12)
-        calc_card.set_vexpand(True)
-        calc_card.set_valign(Gtk.Align.CENTER)
+        calc_card.set_hexpand(True)
 
-        calc_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-        calc_box.set_margin_top(24)
-        calc_box.set_margin_bottom(24)
-        calc_box.set_margin_start(24)
-        calc_box.set_margin_end(24)
+        calc_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        calc_box.set_margin_top(16)
+        calc_box.set_margin_bottom(16)
+        calc_box.set_margin_start(16)
+        calc_box.set_margin_end(16)
         calc_box.set_halign(Gtk.Align.CENTER)
 
         self.question_label = Gtk.Label(label="7 × 8 = ?")
@@ -207,7 +221,7 @@ class GameView(Gtk.Box):
         calc_box.append(self.input_display_box)
 
         # Zone de feedback / félicitations / explication
-        self.feedback_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.feedback_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         self.feedback_box.set_halign(Gtk.Align.CENTER)
 
         self.feedback_label = Gtk.Label(label="")
@@ -220,7 +234,7 @@ class GameView(Gtk.Box):
         calc_box.append(self.feedback_box)
 
         calc_card.set_child(calc_box)
-        self.append(calc_card)
+        self.play_container.append(calc_card)
 
         # Zone des contrôles de saisie (QCM ou Pavé)
         self.input_stack = Gtk.Stack()
@@ -228,15 +242,15 @@ class GameView(Gtk.Box):
 
         # 1. Mode QCM
         self.qcm_box = Gtk.Grid()
-        self.qcm_box.set_row_spacing(12)
-        self.qcm_box.set_column_spacing(12)
+        self.qcm_box.set_row_spacing(10)
+        self.qcm_box.set_column_spacing(10)
         self.qcm_box.set_halign(Gtk.Align.CENTER)
 
         self.qcm_buttons = []
         self.qcm_options = []
         for i in range(4):
             btn = Gtk.Button(label="--")
-            btn.set_size_request(140, 56)
+            btn.set_size_request(130, 52)
             btn.add_css_class("qcm-button")
             row = i // 2
             col = i % 2
@@ -248,19 +262,19 @@ class GameView(Gtk.Box):
         self.input_stack.add_named(self.qcm_box, "qcm")
 
         # 2. Mode Pavé numérique
-        self.keypad_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        self.keypad_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.keypad_box.set_halign(Gtk.Align.CENTER)
 
         grid_pad = Gtk.Grid()
-        grid_pad.set_row_spacing(8)
-        grid_pad.set_column_spacing(8)
+        grid_pad.set_row_spacing(6)
+        grid_pad.set_column_spacing(6)
 
         # Boutons 1 à 9
         for num in range(1, 10):
             r = (num - 1) // 3
             c = (num - 1) % 3
             b = Gtk.Button(label=str(num))
-            b.set_size_request(68, 54)
+            b.set_size_request(66, 50)
             b.add_css_class("keypad-button")
             digit = str(num)
             b.connect("clicked", lambda _, d=digit: self._append_digit(d))
@@ -268,19 +282,19 @@ class GameView(Gtk.Box):
 
         # Ligne du bas : Effacer (C), 0, Valider (✓)
         btn_c = Gtk.Button(label="⌫")
-        btn_c.set_size_request(68, 54)
+        btn_c.set_size_request(66, 50)
         btn_c.add_css_class("keypad-button-clear")
         btn_c.connect("clicked", lambda _: self._clear_input())
         grid_pad.attach(btn_c, 0, 3, 1, 1)
 
         btn_0 = Gtk.Button(label="0")
-        btn_0.set_size_request(68, 54)
+        btn_0.set_size_request(66, 50)
         btn_0.add_css_class("keypad-button")
         btn_0.connect("clicked", lambda _: self._append_digit("0"))
         grid_pad.attach(btn_0, 1, 3, 1, 1)
 
         btn_ok = Gtk.Button(label="✓")
-        btn_ok.set_size_request(68, 54)
+        btn_ok.set_size_request(66, 50)
         btn_ok.add_css_class("suggested-action")
         btn_ok.add_css_class("keypad-button-ok")
         btn_ok.connect("clicked", lambda _: self._submit_keypad_answer())
@@ -289,7 +303,7 @@ class GameView(Gtk.Box):
         self.keypad_box.append(grid_pad)
         self.input_stack.add_named(self.keypad_box, "keypad")
 
-        self.append(self.input_stack)
+        self.play_container.append(self.input_stack)
 
         # Bouton Suivant (s'active après réponse si besoin)
         self.btn_next = Gtk.Button(label=_("btn_next"))
@@ -298,7 +312,30 @@ class GameView(Gtk.Box):
         self.btn_next.add_css_class("suggested-action")
         self.btn_next.connect("clicked", lambda b: self._next_question())
         self.btn_next.set_visible(False)
-        self.append(self.btn_next)
+        self.play_container.append(self.btn_next)
+
+        # Boutons d'action pour la fin de partie (réutilisables sans duplication)
+        self.results_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+        self.results_btn_box.set_halign(Gtk.Align.CENTER)
+        self.results_btn_box.set_margin_top(16)
+        self.results_btn_box.set_visible(False)
+
+        self.btn_retry = Gtk.Button(label=_("btn_play_again"))
+        self.btn_retry.add_css_class("pill")
+        self.btn_retry.add_css_class("suggested-action")
+        self.btn_retry.connect("clicked", self._on_retry_clicked)
+        self.results_btn_box.append(self.btn_retry)
+
+        self.btn_menu = Gtk.Button(label=_("btn_back"))
+        self.btn_menu.add_css_class("pill")
+        self.btn_menu.connect("clicked", lambda _: self.on_back_callback())
+        self.results_btn_box.append(self.btn_menu)
+
+        self.play_container.append(self.results_btn_box)
+
+        clamp.set_child(self.play_container)
+        scroll.set_child(clamp)
+        self.append(scroll)
 
     def start_game(
         self,
@@ -329,8 +366,10 @@ class GameView(Gtk.Box):
             q_type = random.choice(question_types)
             self.questions.append(Question(t, m, q_type))
 
+        self.input_stack.set_visible(True)
         self.input_stack.set_visible_child_name(self.input_mode)
         self.input_display_box.set_visible(self.input_mode == "keypad")
+        self.results_btn_box.set_visible(False)
 
         self._show_question()
 
@@ -483,23 +522,9 @@ class GameView(Gtk.Box):
         self.feedback_label.add_css_class("feedback-success")
         self.feedback_label.set_label(_("level_completed") if stars >= 2 else _("score") + f" : {self.score}/{total}")
         self.feedback_sub.set_label(f"{self.score} / {total} bonnes réponses • Meilleure série : {self.max_streak}")
+        self.results_btn_box.set_visible(True)
 
-        # Boutons d'action
-        btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
-        btn_box.set_halign(Gtk.Align.CENTER)
-        btn_box.set_margin_top(16)
-
-        btn_retry = Gtk.Button(label=_("btn_play_again"))
-        btn_retry.add_css_class("pill")
-        btn_retry.add_css_class("suggested-action")
-        btn_retry.connect("clicked", lambda _: self.start_game(
-            self.tables, total, self.input_mode, [q.q_type for q in self.questions], self.level_id
-        ))
-
-        btn_menu = Gtk.Button(label=_("btn_back"))
-        btn_menu.add_css_class("pill")
-        btn_menu.connect("clicked", lambda _: self.on_back_callback())
-
-        btn_box.append(btn_retry)
-        btn_box.append(btn_menu)
-        self.append(btn_box)
+    def _on_retry_clicked(self, btn):
+        total = len(self.questions)
+        q_types = [q.q_type for q in self.questions]
+        self.start_game(self.tables, total, self.input_mode, q_types, self.level_id)

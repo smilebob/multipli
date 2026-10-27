@@ -45,14 +45,18 @@ class AdventureView(Gtk.Box):
         scrolled.set_hexpand(True)
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
+        clamp = Adw.Clamp()
+        clamp.set_maximum_size(620)
+        clamp.set_tightening_threshold(540)
+
         self.levels_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-        self.levels_container.set_margin_start(20)
-        self.levels_container.set_margin_end(20)
+        self.levels_container.set_margin_start(16)
+        self.levels_container.set_margin_end(16)
         self.levels_container.set_margin_top(12)
         self.levels_container.set_margin_bottom(12)
-        self.levels_container.set_halign(Gtk.Align.CENTER)
 
-        scrolled.set_child(self.levels_container)
+        clamp.set_child(self.levels_container)
+        scrolled.set_child(clamp)
         self.append(scrolled)
 
         self.refresh_levels()
@@ -126,7 +130,7 @@ class AdventureView(Gtk.Box):
     def _create_level_card(self, lvl: dict, stars: int) -> Gtk.Widget:
         bin_card = Adw.Bin()
         bin_card.add_css_class("card")
-        bin_card.set_size_request(580, -1)
+        bin_card.set_hexpand(True)
 
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
         box.set_margin_top(16)

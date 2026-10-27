@@ -145,8 +145,8 @@ class MultipliWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
 
         self.set_title(_("app_title"))
-        self.set_default_size(840, 680)
-        self.set_size_request(420, 500)
+        self.set_default_size(880, 700)
+        self.set_size_request(380, 500)
 
         # Appliquer les styles CSS
         self._apply_css()

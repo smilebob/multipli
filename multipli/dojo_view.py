@@ -43,19 +43,26 @@ class DojoView(Gtk.Box):
         # Contenu dans un ScrolledWindow pour convenir à toutes les tailles d'écrans
         scroll = Gtk.ScrolledWindow()
         scroll.set_vexpand(True)
+        scroll.set_hexpand(True)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
+        clamp = Adw.Clamp()
+        clamp.set_maximum_size(640)
+        clamp.set_tightening_threshold(560)
+
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
-        content.set_margin_start(24)
-        content.set_margin_end(24)
-        content.set_halign(Gtk.Align.CENTER)
-        scroll.set_child(content)
+        content.set_margin_start(16)
+        content.set_margin_end(16)
+        content.set_margin_top(12)
+        content.set_margin_bottom(16)
+        clamp.set_child(content)
+        scroll.set_child(clamp)
         self.append(scroll)
 
         # 1. Sélection des tables
         tables_card = Adw.Bin()
         tables_card.add_css_class("card")
-        tables_card.set_size_request(580, -1)
+        tables_card.set_hexpand(True)
 
         t_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         t_box.set_margin_top(16)
@@ -77,7 +84,7 @@ class DojoView(Gtk.Box):
         self.table_buttons = []
         for i in range(1, 13):
             btn = Gtk.ToggleButton(label=f"× {i}")
-            btn.set_size_request(76, 44)
+            btn.set_size_request(68, 42)
             btn.add_css_class("pill")
             if i in [2, 3, 4, 5]:  # Actives par défaut
                 btn.set_active(True)
@@ -110,22 +117,22 @@ class DojoView(Gtk.Box):
         # 2. Options de jeu (Mode de saisie, Type de calculs, Nombre de questions)
         options_card = Adw.Bin()
         options_card.add_css_class("card")
-        options_card.set_size_request(580, -1)
+        options_card.set_hexpand(True)
 
-        opt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        opt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
         opt_box.set_margin_top(16)
         opt_box.set_margin_bottom(16)
         opt_box.set_margin_start(16)
         opt_box.set_margin_end(16)
 
         # Mode de saisie
-        mode_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        mode_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.mode_lbl = Gtk.Label(label=_("dojo_input_mode"))
         self.mode_lbl.add_css_class("heading")
-        self.mode_lbl.set_hexpand(True)
         self.mode_lbl.set_halign(Gtk.Align.START)
-        mode_row.append(self.mode_lbl)
+        mode_box.append(self.mode_lbl)
 
+        mode_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.radio_qcm = Gtk.ToggleButton(label=_("dojo_mode_qcm"))
         self.radio_qcm.set_active(True)
         self.radio_qcm.add_css_class("pill")
@@ -133,18 +140,19 @@ class DojoView(Gtk.Box):
         self.radio_pad = Gtk.ToggleButton(label=_("dojo_mode_keypad"), group=self.radio_qcm)
         self.radio_pad.add_css_class("pill")
 
-        mode_row.append(self.radio_qcm)
-        mode_row.append(self.radio_pad)
-        opt_box.append(mode_row)
+        mode_btns.append(self.radio_qcm)
+        mode_btns.append(self.radio_pad)
+        mode_box.append(mode_btns)
+        opt_box.append(mode_box)
 
         # Type de calculs
-        type_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        type_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.type_lbl = Gtk.Label(label=_("dojo_question_type"))
         self.type_lbl.add_css_class("heading")
-        self.type_lbl.set_hexpand(True)
         self.type_lbl.set_halign(Gtk.Align.START)
-        type_row.append(self.type_lbl)
+        type_box.append(self.type_lbl)
 
+        type_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.radio_direct = Gtk.ToggleButton(label="Direct (7 × 8)")
         self.radio_direct.set_active(True)
         self.radio_direct.add_css_class("pill")
@@ -155,19 +163,20 @@ class DojoView(Gtk.Box):
         self.radio_mixed = Gtk.ToggleButton(label="Mélange", group=self.radio_direct)
         self.radio_mixed.add_css_class("pill")
 
-        type_row.append(self.radio_direct)
-        type_row.append(self.radio_missing)
-        type_row.append(self.radio_mixed)
-        opt_box.append(type_row)
+        type_btns.append(self.radio_direct)
+        type_btns.append(self.radio_missing)
+        type_btns.append(self.radio_mixed)
+        type_box.append(type_btns)
+        opt_box.append(type_box)
 
         # Nombre de questions
-        count_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        count_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.count_lbl = Gtk.Label(label=_("dojo_count_label"))
         self.count_lbl.add_css_class("heading")
-        self.count_lbl.set_hexpand(True)
         self.count_lbl.set_halign(Gtk.Align.START)
-        count_row.append(self.count_lbl)
+        count_box.append(self.count_lbl)
 
+        count_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.btn_q10 = Gtk.ToggleButton(label="10")
         self.btn_q10.set_active(True)
         self.btn_q10.add_css_class("pill")
@@ -178,10 +187,11 @@ class DojoView(Gtk.Box):
         self.btn_q20 = Gtk.ToggleButton(label="20", group=self.btn_q10)
         self.btn_q20.add_css_class("pill")
 
-        count_row.append(self.btn_q10)
-        count_row.append(self.btn_q15)
-        count_row.append(self.btn_q20)
-        opt_box.append(count_row)
+        count_btns.append(self.btn_q10)
+        count_btns.append(self.btn_q15)
+        count_btns.append(self.btn_q20)
+        count_box.append(count_btns)
+        opt_box.append(count_box)
 
         options_card.set_child(opt_box)
         content.append(options_card)

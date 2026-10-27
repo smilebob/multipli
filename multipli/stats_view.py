@@ -38,12 +38,18 @@ class StatsView(Gtk.Box):
         scroll.set_hexpand(True)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
-        self.content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
-        self.content_box.set_margin_start(20)
-        self.content_box.set_margin_end(20)
-        self.content_box.set_halign(Gtk.Align.CENTER)
+        clamp = Adw.Clamp()
+        clamp.set_maximum_size(640)
+        clamp.set_tightening_threshold(560)
 
-        scroll.set_child(self.content_box)
+        self.content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        self.content_box.set_margin_start(16)
+        self.content_box.set_margin_end(16)
+        self.content_box.set_margin_top(12)
+        self.content_box.set_margin_bottom(16)
+
+        clamp.set_child(self.content_box)
+        scroll.set_child(clamp)
         self.append(scroll)
 
         self.refresh()
@@ -61,7 +67,7 @@ class StatsView(Gtk.Box):
         # 1. Carte résumé du profil
         summary_card = Adw.Bin()
         summary_card.add_css_class("card")
-        summary_card.set_size_request(600, -1)
+        summary_card.set_hexpand(True)
 
         sum_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
         sum_box.set_margin_top(16)
@@ -105,7 +111,7 @@ class StatsView(Gtk.Box):
         # 2. Maîtrise des tables de 1 à 12
         tables_card = Adw.Bin()
         tables_card.add_css_class("card")
-        tables_card.set_size_request(600, -1)
+        tables_card.set_hexpand(True)
 
         tb_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         tb_box.set_margin_top(16)
@@ -170,7 +176,7 @@ class StatsView(Gtk.Box):
         # 3. Trophées
         trophies_card = Adw.Bin()
         trophies_card.add_css_class("card")
-        trophies_card.set_size_request(600, -1)
+        trophies_card.set_hexpand(True)
 
         tr_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         tr_box.set_margin_top(16)

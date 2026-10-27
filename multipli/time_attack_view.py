@@ -306,7 +306,18 @@ class TimeAttackView(Gtk.Box):
         self.res_box.append(r_btns)
         self.stack.add_named(self.res_box, "results")
 
-        self.append(self.stack)
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_vexpand(True)
+        scroll.set_hexpand(True)
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+
+        clamp = Adw.Clamp()
+        clamp.set_maximum_size(600)
+        clamp.set_tightening_threshold(520)
+
+        clamp.set_child(self.stack)
+        scroll.set_child(clamp)
+        self.append(scroll)
         self.reset_to_intro()
 
     def reset_to_intro(self):

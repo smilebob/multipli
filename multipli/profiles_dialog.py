@@ -28,7 +28,7 @@ class EditProfileDialog(Adw.PreferencesWindow):
         self.set_transient_for(parent_window)
         self.set_modal(True)
         self.set_title(_("profile_edit_title"))
-        self.set_default_size(460, 480)
+        self.set_default_size(540, 560)
 
         self.profile = profile
         self.on_saved = on_saved_cb
@@ -43,37 +43,15 @@ class EditProfileDialog(Adw.PreferencesWindow):
         page = Adw.PreferencesPage()
         self.add(page)
 
-        group = Adw.PreferencesGroup(title=_("profile_edit_title"))
-        page.add(group)
+        # 1. Groupe Informations de base
+        group_info = Adw.PreferencesGroup(title=_("profile_edit_title"))
+        page.add(group_info)
 
-        # 1. Prénom
         self.entry_name = Adw.EntryRow(title=_("profile_name"))
         self.entry_name.set_text(self.profile.name)
-        group.add(self.entry_name)
+        group_info.add(self.entry_name)
 
-        # 2. Avatar
-        avatar_row = Adw.ActionRow(title=_("profile_avatar"))
-        avatar_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        avatar_box.set_valign(Gtk.Align.CENTER)
-
-        self.avatar_btns = []
-        for av in self.avatars:
-            b = Gtk.ToggleButton(label=av)
-            b.add_css_class("flat")
-            if av == self.selected_avatar:
-                b.set_active(True)
-            self.avatar_btns.append(b)
-
-            def make_handler(chosen, btn):
-                return lambda _: self._select_avatar(chosen, btn)
-
-            b.connect("clicked", make_handler(av, b))
-            avatar_box.append(b)
-
-        avatar_row.add_suffix(avatar_box)
-        group.add(avatar_row)
-
-        # 3. Niveau de départ
+        # Niveau de départ
         level_list = Gtk.StringList()
         current_idx = 0
         self.level_codes = []
@@ -90,16 +68,52 @@ class EditProfileDialog(Adw.PreferencesWindow):
             model=level_list,
         )
         self.level_combo.set_selected(current_idx)
-        group.add(self.level_combo)
+        group_info.add(self.level_combo)
 
-        # 4. Bouton Enregistrer
+        # 2. Groupe Avatar (présenté dans un cadre dédié et centré)
+        group_avatar = Adw.PreferencesGroup(title=_("profile_avatar"))
+        page.add(group_avatar)
+
+        avatar_card = Adw.Bin()
+        avatar_card.add_css_class("card")
+        avatar_card.set_hexpand(True)
+
+        avatar_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        avatar_box.set_halign(Gtk.Align.CENTER)
+        avatar_box.set_margin_top(12)
+        avatar_box.set_margin_bottom(12)
+        avatar_box.set_margin_start(12)
+        avatar_box.set_margin_end(12)
+
+        self.avatar_btns = []
+        for av in self.avatars:
+            b = Gtk.ToggleButton(label=av)
+            b.add_css_class("flat")
+            b.set_size_request(46, 46)
+            if av == self.selected_avatar:
+                b.set_active(True)
+            self.avatar_btns.append(b)
+
+            def make_handler(chosen, btn):
+                return lambda _: self._select_avatar(chosen, btn)
+
+            b.connect("clicked", make_handler(av, b))
+            avatar_box.append(b)
+
+        avatar_card.set_child(avatar_box)
+        group_avatar.add(avatar_card)
+
+        # 3. Bouton Enregistrer
+        group_action = Adw.PreferencesGroup()
+        page.add(group_action)
+
         save_row = Adw.ActionRow()
         btn_save = Gtk.Button(label=_("btn_save"))
         btn_save.add_css_class("suggested-action")
         btn_save.add_css_class("pill")
         btn_save.connect("clicked", self._on_save_clicked)
         save_row.add_suffix(btn_save)
-        group.add(save_row)
+        group_action.add(save_row)
 
     def _select_avatar(self, chosen: str, active_btn: Gtk.ToggleButton):
         self.selected_avatar = chosen
@@ -133,7 +147,7 @@ class ProfilesDialog(Adw.PreferencesWindow):
         self.set_transient_for(parent_window)
         self.set_modal(True)
         self.set_title(_("profiles_manage"))
-        self.set_default_size(520, 560)
+        self.set_default_size(560, 620)
 
         self.on_profile_changed = on_profile_changed_cb
         self.avatars = ["🦊", "🐼", "🦉", "🐱", "🦁", "🦄", "🚀", "⭐"]
@@ -158,28 +172,6 @@ class ProfilesDialog(Adw.PreferencesWindow):
         self.entry_name = Adw.EntryRow(title=_("profile_name"))
         group_new.add(self.entry_name)
 
-        # Choix de l'avatar
-        avatar_row = Adw.ActionRow(title=_("profile_avatar"))
-        avatar_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        avatar_box.set_valign(Gtk.Align.CENTER)
-
-        self.avatar_btns = []
-        for av in self.avatars:
-            b = Gtk.ToggleButton(label=av)
-            b.add_css_class("flat")
-            if av == self.selected_avatar:
-                b.set_active(True)
-            self.avatar_btns.append(b)
-
-            def make_handler(chosen, btn):
-                return lambda _: self._select_avatar(chosen, btn)
-
-            b.connect("clicked", make_handler(av, b))
-            avatar_box.append(b)
-
-        avatar_row.add_suffix(avatar_box)
-        group_new.add(avatar_row)
-
         # Choix du niveau de départ
         level_list = Gtk.StringList()
         self.new_level_codes = []
@@ -195,20 +187,55 @@ class ProfilesDialog(Adw.PreferencesWindow):
         self.new_level_combo.set_selected(0)
         group_new.add(self.new_level_combo)
 
-        # Bouton Ajouter
+        # Groupe 3 : Choix de l'avatar pour le nouveau profil
+        group_avatar = Adw.PreferencesGroup(title=_("profile_avatar"))
+        page.add(group_avatar)
+
+        avatar_card = Adw.Bin()
+        avatar_card.add_css_class("card")
+        avatar_card.set_hexpand(True)
+
+        avatar_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        avatar_box.set_halign(Gtk.Align.CENTER)
+        avatar_box.set_margin_top(12)
+        avatar_box.set_margin_bottom(12)
+        avatar_box.set_margin_start(12)
+        avatar_box.set_margin_end(12)
+
+        self.avatar_btns = []
+        for av in self.avatars:
+            b = Gtk.ToggleButton(label=av)
+            b.add_css_class("flat")
+            b.set_size_request(46, 46)
+            if av == self.selected_avatar:
+                b.set_active(True)
+            self.avatar_btns.append(b)
+
+            def make_handler(chosen, btn):
+                return lambda _: self._select_avatar(chosen, btn)
+
+            b.connect("clicked", make_handler(av, b))
+            avatar_box.append(b)
+
+        avatar_card.set_child(avatar_box)
+        group_avatar.add(avatar_card)
+
+        # Groupe 4 : Bouton Ajouter
+        group_action = Adw.PreferencesGroup()
+        page.add(group_action)
+
         add_btn_row = Adw.ActionRow()
         btn_add = Gtk.Button(label=_("profile_create"))
         btn_add.add_css_class("suggested-action")
         btn_add.add_css_class("pill")
         btn_add.connect("clicked", self._on_add_profile)
         add_btn_row.add_suffix(btn_add)
-        group_new.add(add_btn_row)
+        group_action.add(add_btn_row)
 
     def _populate_profiles(self):
         storage = StorageManager.get_instance()
         active_id = storage.active_profile_id
 
-        # Traduction lisible du niveau
         level_names = {
             "ce1": "🌱 CE1",
             "ce2": "🌿 CE2",
