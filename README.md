@@ -1,8 +1,13 @@
 # 🌟 Multipli — Le jeu des tables de multiplication
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CI Tests](https://github.com/smilebob/multipli/actions/workflows/ci.yml/badge.svg)](https://github.com/smilebob/multipli/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/smilebob/multipli/releases)
+[![Platform](https://img.shields.io/badge/platform-Linux%20|%20macOS-lightgrey.svg)](#téléchargements--paquets)
+
 **Multipli** est une application éducative **native GNOME** (GTK 4 & Libadwaita), conçue avec soin pour accompagner les élèves du **CE1 au CM2** dans l'apprentissage, la consolidation et la maîtrise complète des tables de multiplication (de 1 à 12).
 
-![Icon](data/icons/org.gnome.Multipli.svg)
+![Multipli Banner](data/icons/org.gnome.Multipli.svg)
 
 ---
 
@@ -23,96 +28,65 @@
    - Progression étape par étape (CE1 $\rightarrow$ CE2 $\rightarrow$ CM1 $\rightarrow$ CM2).
    - Décroche jusqu'à 3 étoiles (⭐ ⭐ ⭐) par niveau.
    - Les niveaux se débloquent au fil des réussites.
-
-2. 🥋 **Le Dojo libre (Entraînement sur-mesure)** :
-   - Choix libre des tables à travailler (sélection multiple parmi 1 à 12).
-   - Choix du type de calcul : Direct ($7 \times 8 = ?$), Facteur manquant ($7 \times ? = 56$), ou Mélange.
-   - Choix du nombre de questions (10, 15, 20) et du mode de réponse (QCM ou Pavé numérique).
-
-3. ⏱️ **Course contre la montre (Chrono 60s)** :
-   - 60 secondes pour résoudre un maximum de calculs !
-   - Enregistrement du record personnel pour stimuler la motivation.
-
-4. 📐 **Table de Pythagore interactive** :
-   - Grille complète et visuelle de $10 \times 10$ ou $12 \times 12$.
-   - Met en lumière la commutativité magique ($a \times b = b \times a$) et les nombres carrés ($a \times a$).
-   - Idéal pour réviser avant de commencer à jouer.
-
-5. 🏆 **Mes Progrès & Mes Trophées** :
-   - Suivi précis de la maîtrise de **chaque table** avec pourcentage de réussite pour repérer immédiatement les tables à retravailler (badge *"À réviser !"* ou *"Parfait !*").
-   - Galerie de trophées à collectionner (*Premier Pas*, *En Feu !*, *Éclair*, *Diplômé CE1*, *Génie des Tables*).
+2. 🥋 **Le Dojo d'Entraînement** :
+   - Choisis librement les tables à réviser sans pression de temps.
+   - Choix entre saisie par QCM ou saisie libre au pavé numérique.
+3. ⏱️ **Le Défi Chrono 60s** :
+   - 60 secondes pour battre ton record personnel de bonnes réponses !
+4. 📐 **Table de Pythagore Interactive** :
+   - Explore les tables de 1 à 10, visualise les motifs géométriques et la commutativité.
+   - Carte de chaleur indiquant la maîtrise de chaque multiplication.
+5. 👤 **Gestion Multi-Profils** :
+   - Créez un profil pour chaque enfant avec avatar, prénom et niveau de départ personnalisable.
+   - Édition et historique individuel des réussites.
 
 ---
 
-## 👥 Multi-profils (pour toute la fratrie)
+## 📦 Téléchargements & Paquets
 
-- Créez facilement un profil pour chaque enfant avec un prénom et un avatar rigolo (🦊, 🐼, 🦉, 🐱, 🦁, 🦄, 🚀, ⭐).
-- Chaque profil conserve ses propres étoiles, ses records chronométrés et ses statistiques par table.
-- Changement de joueur en 1 clic depuis le bouton en haut à gauche.
+Les paquets pré-compilés sont disponibles directement dans les [Releases GitHub](https://github.com/smilebob/multipli/releases) :
 
----
-
-## 🌐 Système multilingue modulaire & ultra-facile à enrichir
-
-Multipli est livré avec **4 langues prêtes à l'emploi** :
-- 🇫🇷 **Français** (`locales/fr.json`)
-- 🇬🇧 **English** (`locales/en.json`)
-- 🇪🇸 **Español** (`locales/es.json`)
-- 🇩🇪 **Deutsch** (`locales/de.json`)
-
-Le changement de langue se fait instantanément depuis le menu **Préférences** (`Ctrl+,`).
-
-### ➕ Comment ajouter une nouvelle langue en 2 minutes ?
-Aucune compilation ni outil complexe n'est requis :
-1. Allez dans le dossier `locales/`.
-2. Dupliquez `en.json` (ou `fr.json`) et renommez-le, par exemple `it.json` pour l'italien ou `pt.json` pour le portugais.
-3. Renseignez `"lang_name"` (ex: `"Italiano"`) et `"lang_flag"` (ex: `"🇮🇹"`), puis traduisez les textes.
-4. **C'est tout !** Multipli détecte automatiquement le nouveau fichier au démarrage ou via le menu des Préférences.
+- **Debian / Ubuntu (`.deb`)** :
+  - `multipli_1.0.0_amd64.deb` (Intel / AMD 64 bits)
+  - `multipli_1.0.0_arm64.deb` (ARM 64 bits / Raspberry Pi)
+  ```bash
+  sudo apt install ./multipli_1.0.0_amd64.deb
+  ```
+- **Flatpak (Linux multi-distributions)** :
+  - `org.gnome.Multipli.flatpak`
+  ```bash
+  flatpak install org.gnome.Multipli.flatpak
+  ```
+- **macOS (`.dmg`)** :
+  - `Multipli-1.0.0-arm64.dmg` (Apple Silicon M1/M2/M3/M4)
+  - `Multipli-1.0.0-x86_64.dmg` (Intel Mac)
 
 ---
 
-## ⌨️ Raccourcis clavier & Contrôles
+## 🚀 Lancement & Installation locale
 
-- **Touches 1, 2, 3, 4** : Sélection directe des options QCM.
-- **Pavé numérique / Chiffres 0 à 9** : Saisie instantanée des nombres.
-- **Touche Entrée / Espace** : Valider la réponse ou passer à la question suivante.
-- **Touche Retour arrière** : Effacer la saisie.
-- **Ctrl + Q** : Quitter l'application.
-- **Ctrl + ,** : Ouvrir les Préférences.
-
----
-
-## 🚀 Lancement & Installation
-
-### Lancement direct (sans installation) :
+### Lancement direct :
 ```bash
-./multipli
+python3 main.py
 ```
 
-### Installation dans le système GNOME :
-Pour intégrer Multipli dans votre lanceur d'applications GNOME avec son icône officielle :
+### Installation système via script :
 ```bash
 ./install.sh
 ```
-L'application apparaîtra dans votre menu d'applications GNOME et pourra être lancée via la commande `multipli`.
-
-### Désinstallation propre :
-```bash
-./install.sh --uninstall
-```
 
 ---
 
-## 🛠️ Dépendances système requises
+## 📚 Documentation
 
-L'application utilise l'écosystème natif GNOME standard sous Linux :
-- `python3`
-- `python3-gi` (PyGObject)
-- `gir1.2-gtk-4.0`
-- `gir1.2-adw-1` (Libadwaita)
-- `gir1.2-gstreamer-1.0` (pour la synthèse des carillons et sons de succès)
+- 📖 [Guide Utilisateur complet (Français)](docs/GUIDE_UTILISATEUR.md)
+- 📖 [User Guide (English)](docs/USER_GUIDE.md)
+- 🛠️ [Guide Développeur (Architecture, Packaging, i18n)](docs/DEVELOPMENT.md)
+- 🤖 [Instructions pour Agents IA (AGENTS.md)](AGENTS.md)
 
-Sous Ubuntu/Debian/Fedora, ces composants sont généralement déjà installés avec GNOME ou s'installent via :
-```bash
-sudo apt install python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gstreamer-1.0
-```
+---
+
+## ⚖️ Licence
+
+Ce projet est distribué sous licence libre **Apache 2.0**. Consultez le fichier [LICENSE](LICENSE) pour plus de détails.
+Des informations sur la licence et le dépôt open-source sont également directement consultables dans l'application via le dialogue *Préférences* et *À propos de Multipli*.

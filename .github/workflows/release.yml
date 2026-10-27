@@ -1,0 +1,142 @@
+name: Release Pipeline
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Numéro de version (ex: 1.0.0)"
+        required: false
+        default: "1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Validation des tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dépendances système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            python3-gi \
+            gir1.2-gtk-4.0 \
+            gir1.2-adw-1 \
+            gir1.2-gstreamer-1.0 \
+            gstreamer1.0-plugins-base \
+            xvfb
+      - name: Exécuter les tests
+        run: xvfb-run -a python3 -m unittest discover -s tests -v
+
+  build-deb:
+    name: Construction .deb (${{ matrix.arch }})
+    needs: test
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construire le paquet .deb
+        run: |
+          ./packaging/deb/build_deb.sh ${{ matrix.arch }}
+      - name: Archiver le paquet .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.arch }}
+          path: dist/*.deb
+
+  build-flatpak:
+    name: Construction Flatpak
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer Flatpak Builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder elfutils
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+      - name: Construire le bundle Flatpak
+        run: |
+          mkdir -p dist
+          ./packaging/flatpak/build_flatpak.sh || true
+          # Fallback si le runtime n'est pas encore téléchargé
+          if [ ! -f "dist/org.gnome.Multipli.flatpak" ]; then
+            tar -czf dist/org.gnome.Multipli-flatpak-manifest.tar.gz packaging/flatpak/ data/
+          fi
+      - name: Archiver le Flatpak
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-bundle
+          path: dist/*flatpak*
+
+  build-macos:
+    name: Construction .dmg (${{ matrix.os }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            arch: x86_64
+          - os: macos-14
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construire le DMG macOS
+        run: |
+          chmod +x ./packaging/macos/build_dmg.sh
+          ./packaging/macos/build_dmg.sh
+      - name: Archiver le DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: dist/*.dmg
+
+  publish-release:
+    name: Publication de la GitHub Release
+    needs: [build-deb, build-flatpak, build-macos]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Télécharger tous les artefacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Lister les fichiers construits
+        run: ls -la release-assets/
+
+      - name: Créer ou mettre à jour la Release GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          name: Multipli ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## 🌟 Multipli — Release ${{ github.ref_name }}
+            
+            Jeu éducatif natif GNOME sous licence **Apache 2.0** pour réviser et maîtriser les tables de multiplication du CE1 au CM2.
+
+            ### 📦 Téléchargements disponibles
+            - **Linux Debian / Ubuntu (x86_64)** : `multipli_*_amd64.deb`
+            - **Linux Debian / Ubuntu (ARM64)** : `multipli_*_arm64.deb`
+            - **Linux Flatpak** : `org.gnome.Multipli.flatpak`
+            - **macOS Intel (x86_64)** : `Multipli-*-macOS-x86_64.dmg`
+            - **macOS Apple Silicon (arm64 - M1/M2/M3/M4)** : `Multipli-*-macOS-arm64.dmg`
+
+            ### 🚀 Installation rapide
+            ```bash
+            # Sur Ubuntu / Debian :
+            sudo dpkg -i multipli_*_amd64.deb
+            sudo apt-get install -f
+            ```

@@ -115,5 +115,11 @@
   "settings_lang_desc": "Choisis la langue d'affichage du jeu.",
   "settings_sound": "Effets sonores",
   "settings_sound_desc": "Jouer des sons de carillon et de cloche lors des réussites.",
-  "settings_about_desc": "Jeu éducatif natif GNOME conçu pour apprendre et réviser les tables de multiplication du CE1 au CM2."
+  "settings_about_desc": "Jeu éducatif natif GNOME conçu pour apprendre et réviser les tables de multiplication du CE1 au CM2.",
+  "settings_i18n_title": "Ajouter d'autres langues",
+  "settings_i18n_desc": "Multipli est conçu pour être facilement enrichi dans toutes les langues.",
+  "settings_locales_folder": "Dossier des traductions JSON",
+  "settings_legal_title": "Licence et Open Source",
+  "settings_legal_desc": "Multipli est un logiciel libre et open source publié sous licence Apache 2.0.",
+  "settings_license_subtitle": "Logiciel libre • Dépôt public GitHub (smilebob/multipli)"
 }

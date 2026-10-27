@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.gnome.Multipli</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <name>Multipli</name>
+  <summary>Le jeu des tables de multiplication pour les élèves de CE1 à CM2</summary>
+  <summary xml:lang="en">The multiplication tables adventure for elementary school students</summary>
+  <summary xml:lang="es">El juego de las tablas de multiplicar para niños de primaria</summary>
+  <summary xml:lang="de">Das Einmaleins-Lernspiel für Grundschulkinder</summary>
+
+  <description>
+    <p>
+      Multipli est une application éducative native GNOME conçue pour accompagner
+      les élèves de l'école élémentaire (du CE1 au CM2) dans l'apprentissage et la maîtrise
+      complète des tables de multiplication.
+    </p>
+    <p>
+      Fonctionnalités principales :
+    </p>
+    <ul>
+      <li>Mode Aventure par classe avec étoiles et progression adaptée.</li>
+      <li>Dojo libre pour s'entraîner sur mesure sur les tables souhaitées.</li>
+      <li>Course contre la montre (Chrono 60s) pour stimuler les réflexes.</li>
+      <li>Table de Pythagore interactive mettant en valeur la commutativité.</li>
+      <li>Multi-profils pour toute la fratrie avec suivi précis des points faibles.</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">org.gnome.Multipli.desktop</launchable>
+
+  <developer id="io.github.smilebob">
+    <name>Pierre &amp; Contributors</name>
+  </developer>
+
+  <url type="homepage">https://github.com/smilebob/multipli</url>
+  <url type="bugtracker">https://github.com/smilebob/multipli/issues</url>
+  <url type="vcs-browser">https://github.com/smilebob/multipli</url>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="1.0.0" date="2026-10-27">
+      <description>
+        <p>Première version officielle de Multipli avec 5 modes de jeu et support multilingue.</p>
+      </description>
+    </release>
+  </releases>
+</component>

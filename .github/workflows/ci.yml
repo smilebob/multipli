@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  test:
+    name: Tests unitaires & intégration
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v4
+
+      - name: Installer les dépendances système GNOME & GStreamer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            python3-gi \
+            gir1.2-gtk-4.0 \
+            gir1.2-adw-1 \
+            gir1.2-gstreamer-1.0 \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            gstreamer1.0-tools \
+            xvfb
+
+      - name: Configurer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Exécuter la suite de tests sous Xvfb
+        run: |
+          xvfb-run -a python3 -m unittest discover -s tests -v
+
+      - name: Vérifier la construction du paquet .deb
+        run: |
+          ./packaging/deb/build_deb.sh amd64
+          ls -la dist/*.deb

@@ -68,18 +68,31 @@ class PreferencesDialog(Adw.PreferencesWindow):
 
         # Groupe 2 : Multilingue & Contribution facile
         group_i18n_info = Adw.PreferencesGroup(
-            title="Ajouter d'autres langues",
-            description="Multipli est conçu pour être facilement enrichi dans toutes les langues."
+            title=_("settings_i18n_title"),
+            description=_("settings_i18n_desc")
         )
         page.add(group_i18n_info)
 
         locales_path = i18n.locales_dir
         info_row = Adw.ActionRow(
-            title="Dossier des traductions",
-            subtitle=f"Déposez simplement un fichier .json (ex: it.json, pt.json) dans :\n{locales_path}",
+            title=_("settings_locales_folder"),
+            subtitle=f"{locales_path}",
         )
         info_row.set_subtitle_selectable(True)
         group_i18n_info.add(info_row)
+
+        # Groupe 3 : Licence & Code source Open Source
+        group_legal = Adw.PreferencesGroup(
+            title=_("settings_legal_title"),
+            description=_("settings_legal_desc")
+        )
+        page.add(group_legal)
+
+        license_row = Adw.ActionRow(
+            title="Apache License 2.0",
+            subtitle=_("settings_license_subtitle"),
+        )
+        group_legal.add(license_row)
 
     def _on_lang_changed(self, combo, param):
         idx = combo.get_selected()

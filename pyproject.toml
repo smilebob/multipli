@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multipli"
+version = "1.0.0"
+description = "Jeu éducatif natif GNOME pour apprendre les tables de multiplication du CE1 au CM2"
+readme = "README.md"
+authors = [
+    { name = "Pierre", email = "pierre@example.com" }
+]
+license = { text = "Apache-2.0" }
+requires-python = ">=3.9"
+dependencies = [
+    "PyGObject>=3.42.0",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: X11 Applications :: Gnome",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: French",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+    "Topic :: Games/Entertainment",
+]
+
+[project.urls]
+Homepage = "https://github.com/smilebob/multipli"
+Repository = "https://github.com/smilebob/multipli.git"
+Issues = "https://github.com/smilebob/multipli/issues"
+
+[project.scripts]
+multipli = "main:main"
+
+[tool.setuptools]
+packages = ["multipli"]
