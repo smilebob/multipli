@@ -225,6 +225,12 @@ class MultipliWindow(Adw.ApplicationWindow):
         self.game_view = GameView(self._on_game_back)
         self.page_game = self.view_stack.add_named(self.game_view, "game")
 
+        # Attacher le ViewStack au contenu central du ToolbarView
+        self.toolbar_view.set_content(self.view_stack)
+
+        # Sélectionner la première vue par défaut
+        self.view_stack.set_visible_child_name("adventure")
+
         # Barre inférieure pour écrans étroits
         self.bottom_bar = Adw.ViewSwitcherBar(stack=self.view_stack)
         self.view_switcher_title.bind_property(
