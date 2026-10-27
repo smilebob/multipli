@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Dégradé de fond style GNOME HIG -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3584e4"/>
+      <stop offset="100%" stop-color="#1c71d8"/>
+    </linearGradient>
+    <!-- Dégradé symbole multiplication -->
+    <linearGradient id="crossGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f6f5f4"/>
+    </linearGradient>
+    <!-- Dégradé étoile dorée -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f9f06b"/>
+      <stop offset="100%" stop-color="#f5c211"/>
+    </linearGradient>
+    <!-- Ombre douce -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Fond carré arrondi GNOME -->
+  <rect x="8" y="10" width="112" height="108" rx="26" ry="26" fill="url(#bgGrad)" filter="url(#dropShadow)"/>
+
+  <!-- Éléments décoratifs discrets -->
+  <circle cx="28" cy="32" r="5" fill="#ffffff" fill-opacity="0.25"/>
+  <circle cx="100" cy="98" r="6" fill="#ffffff" fill-opacity="0.2"/>
+  <circle cx="34" cy="94" r="4" fill="#ffffff" fill-opacity="0.2"/>
+
+  <!-- Symbole de multiplication géant au centre -->
+  <g transform="translate(64, 60)" filter="url(#dropShadow)">
+    <line x1="-24" y1="-24" x2="24" y2="24" stroke="url(#crossGrad)" stroke-width="14" stroke-linecap="round"/>
+    <line x1="24" y1="-24" x2="-24" y2="24" stroke="url(#crossGrad)" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <!-- Étoile de réussite en haut à droite -->
+  <g transform="translate(94, 28) scale(0.9)" filter="url(#dropShadow)">
+    <polygon points="0,-16 4.7,-4.8 16.8,-4.8 7.1,2.5 10.7,14 0,6.9 -10.7,14 -7.1,2.5 -16.8,-4.8 -4.7,-4.8" fill="url(#goldGrad)"/>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Multipli
+Comment=Jeu des tables de multiplication pour les élèves de CE1 à CM2
+Comment[en]=Multiplication tables game for elementary school students
+Comment[es]=Juego de las tablas de multiplicar para niños de primaria
+Exec=multipli
+Icon=org.gnome.Multipli
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;Education;Math;Kids;
+StartupNotify=true
+StartupWMClass=org.gnome.Multipli
+Keywords=math;multiplication;tables;calcul;ecole;ce1;ce2;cm1;cm2;jeu;
