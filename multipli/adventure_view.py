@@ -68,6 +68,10 @@ class AdventureView(Gtk.Box):
         profile = StorageManager.get_instance().get_active_profile()
         stars_dict = profile.stars
 
+        # Calcul des déblocages selon le niveau de départ configuré ou les étoiles obtenues
+        level_order = ["ce1", "ce2", "cm1", "cm2"]
+        start_idx = level_order.index(profile.start_level) if profile.start_level in level_order else 0
+
         levels_config = [
             {
                 "id": "ce1",
@@ -89,7 +93,7 @@ class AdventureView(Gtk.Box):
                 "input_mode": "qcm",
                 "types": ["direct"],
                 "count": 10,
-                "unlocked": stars_dict.get("ce1", 0) >= 1,
+                "unlocked": (start_idx >= 1) or (stars_dict.get("ce1", 0) >= 1),
             },
             {
                 "id": "cm1",
@@ -100,7 +104,7 @@ class AdventureView(Gtk.Box):
                 "input_mode": "keypad",
                 "types": ["direct", "missing_factor_a", "missing_factor_b"],
                 "count": 12,
-                "unlocked": stars_dict.get("ce2", 0) >= 1,
+                "unlocked": (start_idx >= 2) or (stars_dict.get("ce2", 0) >= 1),
             },
             {
                 "id": "cm2",
@@ -111,7 +115,7 @@ class AdventureView(Gtk.Box):
                 "input_mode": "keypad",
                 "types": ["direct", "missing_factor_a", "missing_factor_b"],
                 "count": 15,
-                "unlocked": stars_dict.get("cm1", 0) >= 1,
+                "unlocked": (start_idx >= 3) or (stars_dict.get("cm1", 0) >= 1),
             },
         ]
 

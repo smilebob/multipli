@@ -99,6 +99,10 @@
   "profile_create": "Profil erstellen",
   "profile_delete": "Löschen",
   "profile_current": "Aktueller Spieler:",
+  "profile_edit_title": "Profil bearbeiten",
+  "profile_start_level": "Start-Klassenstufe:",
+  "profile_start_level_desc": "Schaltet Übungen bis zu dieser Stufe frei.",
+  "btn_edit": "Bearbeiten",
 
   "feedback_perfect": "🎉 Perfekt!",
   "feedback_great": "⭐ Klasse!",

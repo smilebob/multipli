@@ -14,6 +14,7 @@ class Profile:
         self,
         name: str = "Élève",
         avatar: str = "🦊",
+        start_level: str = "ce1",
         profile_id: Optional[str] = None,
         stars: Optional[Dict[str, int]] = None,
         chrono_best: int = 0,
@@ -25,6 +26,7 @@ class Profile:
         self.id = profile_id or str(uuid.uuid4())[:8]
         self.name = name
         self.avatar = avatar
+        self.start_level = start_level if start_level in ["ce1", "ce2", "cm1", "cm2"] else "ce1"
         self.stars = stars or {"ce1": 0, "ce2": 0, "cm1": 0, "cm2": 0}
         self.chrono_best = chrono_best
         self.total_answered = total_answered
@@ -38,6 +40,7 @@ class Profile:
             "id": self.id,
             "name": self.name,
             "avatar": self.avatar,
+            "start_level": self.start_level,
             "stars": self.stars,
             "chrono_best": self.chrono_best,
             "total_answered": self.total_answered,
@@ -51,6 +54,7 @@ class Profile:
         return cls(
             name=data.get("name", "Élève"),
             avatar=data.get("avatar", "🦊"),
+            start_level=data.get("start_level", "ce1"),
             profile_id=data.get("id"),
             stars=data.get("stars"),
             chrono_best=data.get("chrono_best", 0),
@@ -59,6 +63,12 @@ class Profile:
             table_stats=data.get("table_stats"),
             trophies=data.get("trophies"),
         )
+
+    def update(self, name: str, avatar: str, start_level: str):
+        self.name = name
+        self.avatar = avatar
+        if start_level in ["ce1", "ce2", "cm1", "cm2"]:
+            self.start_level = start_level
 
     def record_answer(self, table: int, is_correct: bool):
         self.total_answered += 1
@@ -172,12 +182,20 @@ class StorageManager:
                 return p
         return None
 
-    def add_profile(self, name: str, avatar: str = "🦊") -> Profile:
-        p = Profile(name=name, avatar=avatar)
+    def add_profile(self, name: str, avatar: str = "🦊", start_level: str = "ce1") -> Profile:
+        p = Profile(name=name, avatar=avatar, start_level=start_level)
         self.profiles.append(p)
         self.active_profile_id = p.id
         self.save()
         return p
+
+    def update_profile(self, profile_id: str, name: str, avatar: str, start_level: str) -> bool:
+        p = self.get_profile(profile_id)
+        if not p:
+            return False
+        p.update(name=name, avatar=avatar, start_level=start_level)
+        self.save()
+        return True
 
     def delete_profile(self, profile_id: str) -> bool:
         if len(self.profiles) <= 1:

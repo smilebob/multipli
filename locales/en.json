@@ -99,6 +99,10 @@
   "profile_create": "Create Profile",
   "profile_delete": "Delete",
   "profile_current": "Current Player:",
+  "profile_edit_title": "Edit Profile",
+  "profile_start_level": "Starting Grade Level:",
+  "profile_start_level_desc": "Unlocks exercises up to this grade level.",
+  "btn_edit": "Edit",
 
   "feedback_perfect": "🎉 Perfect!",
   "feedback_great": "⭐ Awesome!",

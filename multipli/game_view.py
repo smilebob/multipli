@@ -241,6 +241,8 @@ class GameView(Gtk.Box):
             row = i // 2
             col = i % 2
             self.qcm_box.attach(btn, col, row, 1, 1)
+            # Connexion unique et pérenne du signal de clic
+            btn.connect("clicked", lambda _, idx=i: self._on_qcm_button_clicked(idx))
             self.qcm_buttons.append(btn)
 
         self.input_stack.add_named(self.qcm_box, "qcm")
@@ -367,16 +369,9 @@ class GameView(Gtk.Box):
                 btn.remove_css_class("qcm-correct")
                 btn.remove_css_class("qcm-wrong")
 
-                # Reconnecter le clic
-                try:
-                    btn.disconnect_by_func(self._on_qcm_click)
-                except Exception:
-                    pass
-
-                def make_handler(val, b):
-                    return lambda _: self._check_answer(val, b)
-
-                btn.connect("clicked", make_handler(opt, btn))
+    def _on_qcm_button_clicked(self, index: int):
+        if not self.is_answered and 0 <= index < len(self.qcm_options):
+            self._check_answer(self.qcm_options[index], self.qcm_buttons[index])
 
     def _append_digit(self, digit: str):
         if self.is_answered:

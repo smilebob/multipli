@@ -219,6 +219,7 @@ class TimeAttackView(Gtk.Box):
             r = i // 2
             c = i % 2
             self.qcm_grid.attach(btn, c, r, 1, 1)
+            btn.connect("clicked", lambda _, idx=i: self._on_qcm_button_clicked(idx))
             self.qcm_buttons.append(btn)
 
         self.input_stack.add_named(self.qcm_grid, "qcm")
@@ -365,15 +366,10 @@ class TimeAttackView(Gtk.Box):
             for i, opt in enumerate(self.qcm_options):
                 btn = self.qcm_buttons[i]
                 btn.set_label(str(opt))
-                try:
-                    btn.disconnect_by_func(self._on_qcm_click)
-                except Exception:
-                    pass
 
-                def make_handler(val):
-                    return lambda _: self._check_answer(val)
-
-                btn.connect("clicked", make_handler(opt))
+    def _on_qcm_button_clicked(self, index: int):
+        if self.stack.get_visible_child_name() == "playing" and 0 <= index < len(self.qcm_options):
+            self._check_answer(self.qcm_options[index])
 
     def _append_digit(self, digit: str):
         if len(self.user_input_buffer) < 4:

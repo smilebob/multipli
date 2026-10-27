@@ -99,6 +99,10 @@
   "profile_create": "Crear perfil",
   "profile_delete": "Eliminar",
   "profile_current": "Jugador actual:",
+  "profile_edit_title": "Editar perfil",
+  "profile_start_level": "Nivel inicial:",
+  "profile_start_level_desc": "Desbloquea los ejercicios hasta este curso.",
+  "btn_edit": "Editar",
 
   "feedback_perfect": "🎉 ¡Perfecto!",
   "feedback_great": "⭐ ¡Genial!",

@@ -99,6 +99,10 @@
   "profile_create": "Créer le profil",
   "profile_delete": "Supprimer",
   "profile_current": "Joueur actuel :",
+  "profile_edit_title": "Modifier le profil",
+  "profile_start_level": "Niveau de départ :",
+  "profile_start_level_desc": "Débloque directement l'accès jusqu'à cette classe.",
+  "btn_edit": "Modifier",
 
   "feedback_perfect": "🎉 Parfait !",
   "feedback_great": "⭐ Super !",

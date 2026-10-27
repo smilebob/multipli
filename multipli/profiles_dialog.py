@@ -1,24 +1,139 @@
 """
-Dialogue Adwaita pour gérer les profils des enfants (création, changement, suppression).
+Dialogue Adwaita pour gérer les profils des enfants :
+sélection, édition (prénom, avatar, niveau de départ CE1-CM2), création et suppression.
 """
 
-from typing import Callable
+from typing import Callable, Optional
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 
 from multipli.i18n import _
-from multipli.models import StorageManager
+from multipli.models import StorageManager, Profile
+
+
+LEVEL_OPTIONS = [
+    ("ce1", "🌱 CE1 (Tables 2, 5, 10)"),
+    ("ce2", "🌿 CE2 (Tables 3, 4, 5, 6)"),
+    ("cm1", "⚡ CM1 (Tables 6, 7, 8, 9)"),
+    ("cm2", "👑 CM2 (Toutes les tables 2 à 12)"),
+]
+
+
+class EditProfileDialog(Adw.PreferencesWindow):
+    """Fenêtre de modification d'un profil existant."""
+    def __init__(self, parent_window: Gtk.Window, profile: Profile, on_saved_cb: Callable[[], None]):
+        super().__init__()
+        self.set_transient_for(parent_window)
+        self.set_modal(True)
+        self.set_title(_("profile_edit_title"))
+        self.set_default_size(460, 480)
+
+        self.profile = profile
+        self.on_saved = on_saved_cb
+
+        self.avatars = ["🦊", "🐼", "🦉", "🐱", "🦁", "🦄", "🚀", "⭐"]
+        self.selected_avatar = profile.avatar
+        self.avatar_btns = []
+
+        self._build_ui()
+
+    def _build_ui(self):
+        page = Adw.PreferencesPage()
+        self.add(page)
+
+        group = Adw.PreferencesGroup(title=_("profile_edit_title"))
+        page.add(group)
+
+        # 1. Prénom
+        self.entry_name = Adw.EntryRow(title=_("profile_name"))
+        self.entry_name.set_text(self.profile.name)
+        group.add(self.entry_name)
+
+        # 2. Avatar
+        avatar_row = Adw.ActionRow(title=_("profile_avatar"))
+        avatar_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        avatar_box.set_valign(Gtk.Align.CENTER)
+
+        self.avatar_btns = []
+        for av in self.avatars:
+            b = Gtk.ToggleButton(label=av)
+            b.add_css_class("flat")
+            if av == self.selected_avatar:
+                b.set_active(True)
+            self.avatar_btns.append(b)
+
+            def make_handler(chosen, btn):
+                return lambda _: self._select_avatar(chosen, btn)
+
+            b.connect("clicked", make_handler(av, b))
+            avatar_box.append(b)
+
+        avatar_row.add_suffix(avatar_box)
+        group.add(avatar_row)
+
+        # 3. Niveau de départ
+        level_list = Gtk.StringList()
+        current_idx = 0
+        self.level_codes = []
+
+        for idx, (code, label) in enumerate(LEVEL_OPTIONS):
+            level_list.append(label)
+            self.level_codes.append(code)
+            if code == self.profile.start_level:
+                current_idx = idx
+
+        self.level_combo = Adw.ComboRow(
+            title=_("profile_start_level"),
+            subtitle=_("profile_start_level_desc"),
+            model=level_list,
+        )
+        self.level_combo.set_selected(current_idx)
+        group.add(self.level_combo)
+
+        # 4. Bouton Enregistrer
+        save_row = Adw.ActionRow()
+        btn_save = Gtk.Button(label=_("btn_save"))
+        btn_save.add_css_class("suggested-action")
+        btn_save.add_css_class("pill")
+        btn_save.connect("clicked", self._on_save_clicked)
+        save_row.add_suffix(btn_save)
+        group.add(save_row)
+
+    def _select_avatar(self, chosen: str, active_btn: Gtk.ToggleButton):
+        self.selected_avatar = chosen
+        for b in self.avatar_btns:
+            if b != active_btn:
+                b.set_active(False)
+        active_btn.set_active(True)
+
+    def _on_save_clicked(self, btn):
+        name = self.entry_name.get_text().strip()
+        if not name:
+            name = self.profile.name
+
+        sel_idx = self.level_combo.get_selected()
+        start_level = self.level_codes[sel_idx] if 0 <= sel_idx < len(self.level_codes) else "ce1"
+
+        StorageManager.get_instance().update_profile(
+            self.profile.id,
+            name=name,
+            avatar=self.selected_avatar,
+            start_level=start_level,
+        )
+        self.on_saved()
+        self.close()
 
 
 class ProfilesDialog(Adw.PreferencesWindow):
+    """Fenêtre de gestion et sélection des profils."""
     def __init__(self, parent_window: Gtk.Window, on_profile_changed_cb: Callable[[], None]):
         super().__init__()
         self.set_transient_for(parent_window)
         self.set_modal(True)
         self.set_title(_("profiles_manage"))
-        self.set_default_size(480, 520)
+        self.set_default_size(520, 560)
 
         self.on_profile_changed = on_profile_changed_cb
         self.avatars = ["🦊", "🐼", "🦉", "🐱", "🦁", "🦄", "🚀", "⭐"]
@@ -65,6 +180,21 @@ class ProfilesDialog(Adw.PreferencesWindow):
         avatar_row.add_suffix(avatar_box)
         group_new.add(avatar_row)
 
+        # Choix du niveau de départ
+        level_list = Gtk.StringList()
+        self.new_level_codes = []
+        for code, label in LEVEL_OPTIONS:
+            level_list.append(label)
+            self.new_level_codes.append(code)
+
+        self.new_level_combo = Adw.ComboRow(
+            title=_("profile_start_level"),
+            subtitle=_("profile_start_level_desc"),
+            model=level_list,
+        )
+        self.new_level_combo.set_selected(0)
+        group_new.add(self.new_level_combo)
+
         # Bouton Ajouter
         add_btn_row = Adw.ActionRow()
         btn_add = Gtk.Button(label=_("profile_create"))
@@ -78,14 +208,35 @@ class ProfilesDialog(Adw.PreferencesWindow):
         storage = StorageManager.get_instance()
         active_id = storage.active_profile_id
 
+        # Traduction lisible du niveau
+        level_names = {
+            "ce1": "🌱 CE1",
+            "ce2": "🌿 CE2",
+            "cm1": "⚡ CM1",
+            "cm2": "👑 CM2",
+        }
+
         for profile in storage.profiles:
             row = Adw.ActionRow()
             row.set_title(f"{profile.avatar}  {profile.name}")
             total_stars = sum(profile.stars.values())
-            row.set_subtitle(f"{total_stars} ⭐ • Record chrono : {profile.chrono_best} pts")
+            grade_str = level_names.get(profile.start_level, "🌱 CE1")
+            row.set_subtitle(f"{grade_str} • {total_stars} ⭐ • Record chrono : {profile.chrono_best} pts")
 
             is_active = (profile.id == active_id)
 
+            # 1. Bouton Modifier (Crayon)
+            btn_edit = Gtk.Button.new_from_icon_name("document-edit-symbolic")
+            btn_edit.add_css_class("flat")
+            btn_edit.set_tooltip_text(_("btn_edit"))
+
+            def make_edit_handler(p):
+                return lambda _: self._open_edit_dialog(p)
+
+            btn_edit.connect("clicked", make_edit_handler(profile))
+            row.add_suffix(btn_edit)
+
+            # 2. Bouton Sélectionner / Témoin actif
             if is_active:
                 check_icon = Gtk.Image.new_from_icon_name("emblem-ok-symbolic")
                 check_icon.add_css_class("accent")
@@ -101,7 +252,7 @@ class ProfilesDialog(Adw.PreferencesWindow):
                 btn_select.connect("clicked", make_select_handler(profile.id))
                 row.add_suffix(btn_select)
 
-            # Bouton supprimer si plus d'un profil
+            # 3. Bouton Supprimer
             if len(storage.profiles) > 1 and not is_active:
                 btn_del = Gtk.Button.new_from_icon_name("user-trash-symbolic")
                 btn_del.add_css_class("flat")
@@ -114,6 +265,14 @@ class ProfilesDialog(Adw.PreferencesWindow):
                 row.add_suffix(btn_del)
 
             self.group_profiles.add(row)
+
+    def _open_edit_dialog(self, profile: Profile):
+        def on_saved():
+            self.on_profile_changed()
+            self.close()
+
+        dlg = EditProfileDialog(self, profile, on_saved)
+        dlg.present()
 
     def _select_avatar(self, chosen: str, active_btn: Gtk.ToggleButton):
         self.selected_avatar = chosen
@@ -137,7 +296,10 @@ class ProfilesDialog(Adw.PreferencesWindow):
         if not name:
             name = "Élève"
 
-        StorageManager.get_instance().add_profile(name, self.selected_avatar)
+        sel_idx = self.new_level_combo.get_selected()
+        start_level = self.new_level_codes[sel_idx] if 0 <= sel_idx < len(self.new_level_codes) else "ce1"
+
+        StorageManager.get_instance().add_profile(name, self.selected_avatar, start_level=start_level)
         self.entry_name.set_text("")
         self.on_profile_changed()
         self.close()
