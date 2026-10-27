@@ -345,8 +345,10 @@ class GameView(Gtk.Box):
         question_types: List[str] = None,
         level_id: Optional[str] = None,
     ):
-        self.tables = tables
+        self.tables = list(tables)
+        self.total_questions = total_questions
         self.input_mode = input_mode
+        self.question_types = list(question_types) if question_types else ["direct"]
         self.level_id = level_id
         self.score = 0
         self.streak = 0
@@ -355,15 +357,12 @@ class GameView(Gtk.Box):
         self.user_input_buffer = ""
         self.is_answered = False
 
-        if not question_types:
-            question_types = ["direct"]
-
         # Générer la liste des questions
         self.questions = []
         for _ in range(total_questions):
-            t = random.choice(tables)
+            t = random.choice(self.tables)
             m = random.randint(1, 10)
-            q_type = random.choice(question_types)
+            q_type = random.choice(self.question_types)
             self.questions.append(Question(t, m, q_type))
 
         self.input_stack.set_visible(True)
@@ -397,9 +396,16 @@ class GameView(Gtk.Box):
         # Cacher feedback et bouton suivant
         self.feedback_box.set_visible(False)
         self.btn_next.set_visible(False)
+        self.results_btn_box.set_visible(False)
+
+        # Assurer la visibilité du mode de saisie
+        self.input_stack.set_visible(True)
+        self.input_stack.set_visible_child_name(self.input_mode)
+        self.input_display_box.set_visible(self.input_mode == "keypad")
 
         # Préparer le mode d'entrée
         if self.input_mode == "qcm":
+            self.qcm_box.set_visible(True)
             self.qcm_options = q.generate_options()
             for i, opt in enumerate(self.qcm_options):
                 btn = self.qcm_buttons[i]
@@ -525,6 +531,10 @@ class GameView(Gtk.Box):
         self.results_btn_box.set_visible(True)
 
     def _on_retry_clicked(self, btn):
-        total = len(self.questions)
-        q_types = [q.q_type for q in self.questions]
-        self.start_game(self.tables, total, self.input_mode, q_types, self.level_id)
+        self.start_game(
+            self.tables,
+            self.total_questions,
+            self.input_mode,
+            self.question_types,
+            self.level_id
+        )
