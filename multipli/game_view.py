@@ -100,13 +100,16 @@ class GameView(Gtk.Box):
 
     def _setup_keyboard_events(self):
         controller = Gtk.EventControllerKey.new()
-        controller.connect("key-pressed", self._on_key_pressed)
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.connect("key-pressed", lambda c, k, kc, s: self.handle_key(k))
         self.add_controller(controller)
 
-    def _on_key_pressed(self, controller, keyval, keycode, state):
+    def handle_key(self, keyval: int) -> bool:
+        ENTER_KEYS = (Gdk.KEY_Return, Gdk.KEY_KP_Enter, Gdk.KEY_ISO_Enter)
+
         if self.is_answered:
-            # Si déjà répondu, Entrée ou Espace passe à la suite
-            if keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter, Gdk.KEY_space):
+            # Si déjà répondu, Entrée ou Espace passe immédiatement à la suite
+            if keyval in ENTER_KEYS or keyval == Gdk.KEY_space:
                 self._next_question()
                 return True
             return False
@@ -121,33 +124,59 @@ class GameView(Gtk.Box):
             }
             if keyval in qcm_keys:
                 idx = qcm_keys[keyval]
-                if idx < len(self.qcm_buttons):
-                    self._check_answer(self.qcm_options[idx], self.qcm_buttons[idx])
+                if idx < len(self.qcm_options):
+                    self._on_qcm_button_clicked(idx)
                     return True
         else:
             # Mode Pavé numérique / saisie clavier direct
-            # Chiffres 0-9
-            digit_keys = {
-                Gdk.KEY_0: "0", Gdk.KEY_KP_0: "0", Gdk.KEY_agrave: "0",
-                Gdk.KEY_1: "1", Gdk.KEY_KP_1: "1", Gdk.KEY_ampersand: "1",
-                Gdk.KEY_2: "2", Gdk.KEY_KP_2: "2", Gdk.KEY_eacute: "2",
-                Gdk.KEY_3: "3", Gdk.KEY_KP_3: "3", Gdk.KEY_quotedbl: "3",
-                Gdk.KEY_4: "4", Gdk.KEY_KP_4: "4", Gdk.KEY_apostrophe: "4",
-                Gdk.KEY_5: "5", Gdk.KEY_KP_5: "5", Gdk.KEY_parenleft: "5",
-                Gdk.KEY_6: "6", Gdk.KEY_KP_6: "6", Gdk.KEY_minus: "6",
-                Gdk.KEY_7: "7", Gdk.KEY_KP_7: "7", Gdk.KEY_egrave: "7",
-                Gdk.KEY_8: "8", Gdk.KEY_KP_8: "8", Gdk.KEY_underscore: "8",
-                Gdk.KEY_9: "9", Gdk.KEY_KP_9: "9", Gdk.KEY_ccedilla: "9",
-            }
-            if keyval in digit_keys:
-                self._append_digit(digit_keys[keyval])
-                return True
-            elif keyval in (Gdk.KEY_BackSpace, Gdk.KEY_Delete):
-                self._clear_input()
-                return True
-            elif keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+            # 1. Validation immédiate avec la touche Entrée (clavier principal ou pavé numérique)
+            if keyval in ENTER_KEYS:
                 self._submit_keypad_answer()
                 return True
+
+            # 2. Effacement d'un chiffre avec Retour arrière ou Suppr
+            if keyval in (Gdk.KEY_BackSpace, Gdk.KEY_Delete):
+                self._backspace_input()
+                return True
+
+            # 3. Chiffres AZERTY (rangée supérieure non shiftée)
+            azerty_digits = {
+                Gdk.KEY_agrave: "0",
+                Gdk.KEY_ampersand: "1",
+                Gdk.KEY_eacute: "2",
+                Gdk.KEY_quotedbl: "3",
+                Gdk.KEY_apostrophe: "4",
+                Gdk.KEY_parenleft: "5",
+                Gdk.KEY_minus: "6",
+                Gdk.KEY_egrave: "7",
+                Gdk.KEY_underscore: "8",
+                Gdk.KEY_ccedilla: "9",
+            }
+            if keyval in azerty_digits:
+                self._append_digit(azerty_digits[keyval])
+                return True
+
+            # 4. Pavé numérique physique (KP_0 .. KP_9)
+            kp_digits = {
+                Gdk.KEY_KP_0: "0", Gdk.KEY_KP_1: "1", Gdk.KEY_KP_2: "2",
+                Gdk.KEY_KP_3: "3", Gdk.KEY_KP_4: "4", Gdk.KEY_KP_5: "5",
+                Gdk.KEY_KP_6: "6", Gdk.KEY_KP_7: "7", Gdk.KEY_KP_8: "8",
+                Gdk.KEY_KP_9: "9",
+            }
+            if keyval in kp_digits:
+                self._append_digit(kp_digits[keyval])
+                return True
+
+            # 5. Conversion universelle de caractère numérique unicode (QWERTY, etc.)
+            char_code = Gdk.keyval_to_unicode(keyval)
+            if char_code:
+                try:
+                    char_str = chr(char_code)
+                    if char_str.isdigit():
+                        self._append_digit(char_str)
+                        return True
+                except Exception:
+                    pass
 
         return False
 
@@ -252,6 +281,7 @@ class GameView(Gtk.Box):
             btn = Gtk.Button(label="--")
             btn.set_size_request(130, 52)
             btn.add_css_class("qcm-button")
+            btn.set_focusable(False)
             row = i // 2
             col = i % 2
             self.qcm_box.attach(btn, col, row, 1, 1)
@@ -276,6 +306,7 @@ class GameView(Gtk.Box):
             b = Gtk.Button(label=str(num))
             b.set_size_request(66, 50)
             b.add_css_class("keypad-button")
+            b.set_focusable(False)
             digit = str(num)
             b.connect("clicked", lambda _, d=digit: self._append_digit(d))
             grid_pad.attach(b, c, r, 1, 1)
@@ -284,12 +315,14 @@ class GameView(Gtk.Box):
         btn_c = Gtk.Button(label="⌫")
         btn_c.set_size_request(66, 50)
         btn_c.add_css_class("keypad-button-clear")
-        btn_c.connect("clicked", lambda _: self._clear_input())
+        btn_c.set_focusable(False)
+        btn_c.connect("clicked", lambda _: self._backspace_input())
         grid_pad.attach(btn_c, 0, 3, 1, 1)
 
         btn_0 = Gtk.Button(label="0")
         btn_0.set_size_request(66, 50)
         btn_0.add_css_class("keypad-button")
+        btn_0.set_focusable(False)
         btn_0.connect("clicked", lambda _: self._append_digit("0"))
         grid_pad.attach(btn_0, 1, 3, 1, 1)
 
@@ -297,6 +330,7 @@ class GameView(Gtk.Box):
         btn_ok.set_size_request(66, 50)
         btn_ok.add_css_class("suggested-action")
         btn_ok.add_css_class("keypad-button-ok")
+        btn_ok.set_focusable(False)
         btn_ok.connect("clicked", lambda _: self._submit_keypad_answer())
         grid_pad.attach(btn_ok, 2, 3, 1, 1)
 
@@ -424,6 +458,13 @@ class GameView(Gtk.Box):
         if len(self.user_input_buffer) < 4:
             self.user_input_buffer += digit
             self.input_display_label.set_label(self.user_input_buffer)
+
+    def _backspace_input(self):
+        if self.is_answered:
+            return
+        if self.user_input_buffer:
+            self.user_input_buffer = self.user_input_buffer[:-1]
+            self.input_display_label.set_label(self.user_input_buffer if self.user_input_buffer else "_")
 
     def _clear_input(self):
         if self.is_answered:

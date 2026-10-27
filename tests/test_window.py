@@ -69,6 +69,32 @@ class TestWindowE2E(unittest.TestCase):
         self.win._on_game_back()
         self.assertEqual(self.win.view_stack.get_visible_child_name(), "adventure")
 
+    def test_window_routes_enter_key_to_game(self):
+        from gi.repository import Gdk
+
+        cfg = {
+            "tables": [5],
+            "total_questions": 2,
+            "input_mode": "keypad",
+            "question_types": ["direct"],
+            "level_id": None,
+        }
+        self.win._start_dojo_game(cfg)
+        self.assertEqual(self.win.view_stack.get_visible_child_name(), "game")
+
+        # Simuler la frappe au niveau de la fenêtre avec Gdk.KEY_KP_Enter
+        q = self.win.game_view.questions[0]
+        for d in str(q.correct_answer):
+            self.win._on_window_key_pressed(None, getattr(Gdk, f"KEY_KP_{d}"), 0, 0)
+
+        # Valider avec Entrée du pavé numérique au niveau de la fenêtre
+        res = self.win._on_window_key_pressed(None, Gdk.KEY_KP_Enter, 0, 0)
+        self.assertTrue(res)
+        self.assertTrue(self.win.game_view.is_answered)
+        self.assertEqual(self.win.game_view.score, 1)
+
+        self.win._on_game_back()
+
     def test_dojo_to_game_and_back(self):
         cfg = {
             "tables": [3, 4],
@@ -84,6 +110,32 @@ class TestWindowE2E(unittest.TestCase):
 
         self.win._on_game_back()
         self.assertEqual(self.win.view_stack.get_visible_child_name(), "adventure")
+
+    def test_window_routes_enter_key_to_game(self):
+        from gi.repository import Gdk
+
+        cfg = {
+            "tables": [5],
+            "total_questions": 2,
+            "input_mode": "keypad",
+            "question_types": ["direct"],
+            "level_id": None,
+        }
+        self.win._start_dojo_game(cfg)
+        self.assertEqual(self.win.view_stack.get_visible_child_name(), "game")
+
+        # Simuler la frappe au niveau de la fenêtre avec Gdk.KEY_KP_Enter
+        q = self.win.game_view.questions[0]
+        for d in str(q.correct_answer):
+            self.win._on_window_key_pressed(None, getattr(Gdk, f"KEY_KP_{d}"), 0, 0)
+
+        # Valider avec Entrée du pavé numérique au niveau de la fenêtre
+        res = self.win._on_window_key_pressed(None, Gdk.KEY_KP_Enter, 0, 0)
+        self.assertTrue(res)
+        self.assertTrue(self.win.game_view.is_answered)
+        self.assertEqual(self.win.game_view.score, 1)
+
+        self.win._on_game_back()
 
     def test_dialogs_instantiation(self):
         p = StorageManager.get_instance().get_active_profile()

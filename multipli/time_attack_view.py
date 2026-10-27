@@ -37,12 +37,15 @@ class TimeAttackView(Gtk.Box):
 
     def _setup_keyboard_events(self):
         controller = Gtk.EventControllerKey.new()
-        controller.connect("key-pressed", self._on_key_pressed)
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.connect("key-pressed", lambda c, k, kc, s: self.handle_key(k))
         self.add_controller(controller)
 
-    def _on_key_pressed(self, controller, keyval, keycode, state):
+    def handle_key(self, keyval: int) -> bool:
         if self.stack.get_visible_child_name() != "playing":
             return False
+
+        ENTER_KEYS = (Gdk.KEY_Return, Gdk.KEY_KP_Enter, Gdk.KEY_ISO_Enter)
 
         if self.input_mode == "qcm":
             qcm_keys = {
@@ -53,31 +56,58 @@ class TimeAttackView(Gtk.Box):
             }
             if keyval in qcm_keys:
                 idx = qcm_keys[keyval]
-                if idx < len(self.qcm_buttons):
+                if idx < len(self.qcm_options):
                     self._check_answer(self.qcm_options[idx])
                     return True
         else:
-            digit_keys = {
-                Gdk.KEY_0: "0", Gdk.KEY_KP_0: "0",
-                Gdk.KEY_1: "1", Gdk.KEY_KP_1: "1",
-                Gdk.KEY_2: "2", Gdk.KEY_KP_2: "2",
-                Gdk.KEY_3: "3", Gdk.KEY_KP_3: "3",
-                Gdk.KEY_4: "4", Gdk.KEY_KP_4: "4",
-                Gdk.KEY_5: "5", Gdk.KEY_KP_5: "5",
-                Gdk.KEY_6: "6", Gdk.KEY_KP_6: "6",
-                Gdk.KEY_7: "7", Gdk.KEY_KP_7: "7",
-                Gdk.KEY_8: "8", Gdk.KEY_KP_8: "8",
-                Gdk.KEY_9: "9", Gdk.KEY_KP_9: "9",
-            }
-            if keyval in digit_keys:
-                self._append_digit(digit_keys[keyval])
-                return True
-            elif keyval in (Gdk.KEY_BackSpace, Gdk.KEY_Delete):
-                self._clear_input()
-                return True
-            elif keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+            # 1. Validation avec Entrée
+            if keyval in ENTER_KEYS:
                 self._submit_keypad()
                 return True
+
+            # 2. Effacement
+            if keyval in (Gdk.KEY_BackSpace, Gdk.KEY_Delete):
+                self._backspace_input()
+                return True
+
+            # 3. AZERTY
+            azerty_digits = {
+                Gdk.KEY_agrave: "0",
+                Gdk.KEY_ampersand: "1",
+                Gdk.KEY_eacute: "2",
+                Gdk.KEY_quotedbl: "3",
+                Gdk.KEY_apostrophe: "4",
+                Gdk.KEY_parenleft: "5",
+                Gdk.KEY_minus: "6",
+                Gdk.KEY_egrave: "7",
+                Gdk.KEY_underscore: "8",
+                Gdk.KEY_ccedilla: "9",
+            }
+            if keyval in azerty_digits:
+                self._append_digit(azerty_digits[keyval])
+                return True
+
+            # 4. Pavé numérique KP
+            kp_digits = {
+                Gdk.KEY_KP_0: "0", Gdk.KEY_KP_1: "1", Gdk.KEY_KP_2: "2",
+                Gdk.KEY_KP_3: "3", Gdk.KEY_KP_4: "4", Gdk.KEY_KP_5: "5",
+                Gdk.KEY_KP_6: "6", Gdk.KEY_KP_7: "7", Gdk.KEY_KP_8: "8",
+                Gdk.KEY_KP_9: "9",
+            }
+            if keyval in kp_digits:
+                self._append_digit(kp_digits[keyval])
+                return True
+
+            # 5. Conversion universelle unicode
+            char_code = Gdk.keyval_to_unicode(keyval)
+            if char_code:
+                try:
+                    char_str = chr(char_code)
+                    if char_str.isdigit():
+                        self._append_digit(char_str)
+                        return True
+                except Exception:
+                    pass
 
         return False
 
@@ -216,6 +246,7 @@ class TimeAttackView(Gtk.Box):
             btn = Gtk.Button(label="--")
             btn.set_size_request(130, 52)
             btn.add_css_class("qcm-button")
+            btn.set_focusable(False)
             r = i // 2
             c = i % 2
             self.qcm_grid.attach(btn, c, r, 1, 1)
@@ -238,6 +269,7 @@ class TimeAttackView(Gtk.Box):
             b = Gtk.Button(label=str(num))
             b.set_size_request(64, 48)
             b.add_css_class("keypad-button")
+            b.set_focusable(False)
             d = str(num)
             b.connect("clicked", lambda _, digit=d: self._append_digit(digit))
             kp_grid.attach(b, c, r, 1, 1)
@@ -245,12 +277,14 @@ class TimeAttackView(Gtk.Box):
         b_c = Gtk.Button(label="⌫")
         b_c.set_size_request(64, 48)
         b_c.add_css_class("keypad-button-clear")
-        b_c.connect("clicked", lambda _: self._clear_input())
+        b_c.set_focusable(False)
+        b_c.connect("clicked", lambda _: self._backspace_input())
         kp_grid.attach(b_c, 0, 3, 1, 1)
 
         b_0 = Gtk.Button(label="0")
         b_0.set_size_request(64, 48)
         b_0.add_css_class("keypad-button")
+        b_0.set_focusable(False)
         b_0.connect("clicked", lambda _: self._append_digit("0"))
         kp_grid.attach(b_0, 1, 3, 1, 1)
 
@@ -258,6 +292,7 @@ class TimeAttackView(Gtk.Box):
         b_ok.set_size_request(64, 48)
         b_ok.add_css_class("suggested-action")
         b_ok.add_css_class("keypad-button-ok")
+        b_ok.set_focusable(False)
         b_ok.connect("clicked", lambda _: self._submit_keypad())
         kp_grid.attach(b_ok, 2, 3, 1, 1)
 
@@ -386,6 +421,11 @@ class TimeAttackView(Gtk.Box):
         if len(self.user_input_buffer) < 4:
             self.user_input_buffer += digit
             self.pad_display.set_label(self.user_input_buffer)
+
+    def _backspace_input(self):
+        if self.user_input_buffer:
+            self.user_input_buffer = self.user_input_buffer[:-1]
+            self.pad_display.set_label(self.user_input_buffer if self.user_input_buffer else "_")
 
     def _clear_input(self):
         self.user_input_buffer = ""

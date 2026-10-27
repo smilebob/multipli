@@ -155,7 +155,23 @@ class MultipliWindow(Adw.ApplicationWindow):
         I18n.get_instance().add_listener(self._on_language_changed)
 
         self._build_ui()
+        self._setup_window_keyboard_events()
         self._update_profile_button()
+
+    def _setup_window_keyboard_events(self):
+        # Contrôleur d'événements clavier global (priorité CAPTURE pour intercepter Entrée et chiffres)
+        self.key_controller = Gtk.EventControllerKey.new()
+        self.key_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.key_controller.connect("key-pressed", self._on_window_key_pressed)
+        self.add_controller(self.key_controller)
+
+    def _on_window_key_pressed(self, controller, keyval, keycode, state):
+        visible_name = self.view_stack.get_visible_child_name()
+        if visible_name == "game":
+            return self.game_view.handle_key(keyval)
+        elif visible_name == "chrono":
+            return self.chrono_view.handle_key(keyval)
+        return False
 
     def _apply_css(self):
         provider = Gtk.CssProvider()

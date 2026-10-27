@@ -110,6 +110,41 @@ class TestGameLoop(unittest.TestCase):
         self.gv._submit_keypad_answer()
         self.assertEqual(self.gv.score, 1)
 
+    def test_keypad_enter_key_validation(self):
+        """Vérifie que les touches Entrée (Return et KP_Enter) valident la saisie du pavé."""
+        from gi.repository import Gdk
+
+        self.gv.start_game(tables=[4], total_questions=3, input_mode="keypad")
+        q0 = self.gv.questions[0]
+
+        # 1. Taper la bonne réponse avec les touches du pavé numérique physique (Gdk.KEY_KP_X)
+        for d in str(q0.correct_answer):
+            kp_key = getattr(Gdk, f"KEY_KP_{d}")
+            handled = self.gv.handle_key(kp_key)
+            self.assertTrue(handled)
+
+        self.assertEqual(self.gv.user_input_buffer, str(q0.correct_answer))
+
+        # 2. Appuyer sur Entrée du pavé numérique (Gdk.KEY_KP_Enter)
+        handled = self.gv.handle_key(Gdk.KEY_KP_Enter)
+        self.assertTrue(handled, "Gdk.KEY_KP_Enter doit être intercepté et validé")
+        self.assertTrue(self.gv.is_answered, "La question doit être marquée comme répondue")
+        self.assertEqual(self.gv.score, 1, "Le score doit être incrémenté avec la touche Entrée KP")
+
+        # 3. Passer à la question suivante avec Entrée
+        self.gv.handle_key(Gdk.KEY_KP_Enter)
+        self.assertEqual(self.gv.current_idx, 1)
+
+        # 4. Taper la réponse à la question 1 et valider avec Entrée clavier classique (Gdk.KEY_Return)
+        q1 = self.gv.questions[1]
+        for d in str(q1.correct_answer):
+            self.gv.handle_key(getattr(Gdk, f"KEY_{d}"))
+
+        handled = self.gv.handle_key(Gdk.KEY_Return)
+        self.assertTrue(handled, "Gdk.KEY_Return doit valider la réponse")
+        self.assertTrue(self.gv.is_answered)
+        self.assertEqual(self.gv.score, 2)
+
     def test_adventure_view_unlock_logic(self):
         """Vérifie le déblocage des niveaux selon la classe et les étoiles."""
         storage = StorageManager.get_instance()
