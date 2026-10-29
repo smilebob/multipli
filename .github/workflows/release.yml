@@ -114,16 +114,28 @@ jobs:
       - name: Lister les fichiers construits
         run: ls -la release-assets/
 
+      - name: Déterminer le tag de release
+        id: release_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_VAL="v${{ github.event.inputs.version || '1.0.0' }}"
+          else
+            TAG_VAL="${{ github.ref_name }}"
+          fi
+          echo "tag=${TAG_VAL}" >> $GITHUB_OUTPUT
+          echo "Utilisation du tag: ${TAG_VAL}"
+
       - name: Créer ou mettre à jour la Release GitHub
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
           files: release-assets/*
-          name: Multipli ${{ github.ref_name }}
+          name: Multipli ${{ steps.release_tag.outputs.tag }}
           draft: false
           prerelease: false
           generate_release_notes: true
           body: |
-            ## 🌟 Multipli — Release ${{ github.ref_name }}
+            ## 🌟 Multipli — Release ${{ steps.release_tag.outputs.tag }}
             
             Jeu éducatif natif GNOME sous licence **Apache 2.0** pour réviser et maîtriser les tables de multiplication du CE1 au CM2.
 
