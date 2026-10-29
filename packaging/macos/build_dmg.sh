@@ -4,7 +4,7 @@ set -e
 # Script de génération du paquet .dmg pour macOS (x86_64 et arm64)
 # Exécuté dans l'environnement GitHub Actions macOS
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 APP_NAME="Multipli"
 PKG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${PKG_DIR}/../.." && pwd)"
@@ -19,10 +19,12 @@ rm -rf "${APP_DIR}"
 mkdir -p "${APP_DIR}/Contents/MacOS"
 mkdir -p "${APP_DIR}/Contents/Resources/locales"
 
-# Copie des fichiers source
+# Copie des fichiers source et licences
 cp "${ROOT_DIR}/main.py" "${APP_DIR}/Contents/Resources/"
 cp -r "${ROOT_DIR}/multipli" "${APP_DIR}/Contents/Resources/"
 cp -r "${ROOT_DIR}/locales/"* "${APP_DIR}/Contents/Resources/locales/"
+cp "${ROOT_DIR}/LICENSE" "${APP_DIR}/Contents/Resources/LICENSE"
+cp "${ROOT_DIR}/README.md" "${APP_DIR}/Contents/Resources/README.md"
 
 # Script de démarrage Mac dans MacOS/Multipli
 cat << 'EOF' > "${APP_DIR}/Contents/MacOS/Multipli"
@@ -64,6 +66,8 @@ cat << EOF > "${APP_DIR}/Contents/Info.plist"
     <string>${VERSION}</string>
     <key>CFBundleVersion</key>
     <string>${VERSION}</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026 Pierre &amp; Contributors. Released under the Apache 2.0 License. https://github.com/smilebob/multipli</string>
     <key>LSMinimumSystemVersion</key>
     <string>11.0</string>
     <key>NSHighResolutionCapable</key>
@@ -78,6 +82,8 @@ rm -rf "${DMG_STAGE}"
 mkdir -p "${DMG_STAGE}"
 cp -r "${APP_DIR}" "${DMG_STAGE}/"
 ln -s /Applications "${DMG_STAGE}/Applications"
+cp "${ROOT_DIR}/LICENSE" "${DMG_STAGE}/LICENSE.txt"
+cp "${ROOT_DIR}/README.md" "${DMG_STAGE}/README.txt"
 
 DMG_FILE="${OUTPUT_DIR}/Multipli-${VERSION}-macOS-${ARCH}.dmg"
 rm -f "${DMG_FILE}"

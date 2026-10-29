@@ -40,6 +40,11 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="1.0.1" date="2026-10-29">
+      <description>
+        <p>Inclusion complète des métadonnées de licence Apache 2.0 et liens vers le dépôt GitHub source dans tous les paquets d'installation (.deb, Flatpak, macOS DMG).</p>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-10-27">
       <description>
         <p>Première version officielle de Multipli avec 5 modes de jeu et support multilingue.</p>

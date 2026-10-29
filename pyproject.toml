@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "multipli"
-version = "1.0.0"
+version = "1.0.1"
 description = "Jeu éducatif natif GNOME pour apprendre les tables de multiplication du CE1 au CM2"
 readme = "README.md"
 authors = [

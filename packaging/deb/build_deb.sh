@@ -4,7 +4,7 @@ set -e
 # Script de génération de paquet .deb pour Multipli
 # Usage: ./build_deb.sh [amd64|arm64|all]
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 ARCH="${1:-amd64}"
 APP_ID="org.gnome.Multipli"
 PKG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,7 +35,11 @@ Description: Jeu éducatif natif GNOME des tables de multiplication (CE1 au CM2)
  Multipli est une application éducative moderne Libadwaita pour apprendre
  et maîtriser les tables de multiplication du CE1 au CM2 avec multi-profils,
  aventure progressive, chrono 60s et table de Pythagore.
+ Distribué sous licence Apache-2.0.
+ Code source & suivi : https://github.com/smilebob/multipli
 Homepage: https://github.com/smilebob/multipli
+Vcs-Browser: https://github.com/smilebob/multipli
+Vcs-Git: https://github.com/smilebob/multipli.git
 EOF
 
 # Scripts postinst et postrm pour le cache des icônes et menus
@@ -65,7 +69,21 @@ chmod 755 "${BUILD_ROOT}/DEBIAN/postrm"
 cp "${ROOT_DIR}/main.py" "${BUILD_ROOT}/usr/lib/multipli/"
 cp -r "${ROOT_DIR}/multipli/"* "${BUILD_ROOT}/usr/lib/multipli/multipli/"
 cp -r "${ROOT_DIR}/locales/"* "${BUILD_ROOT}/usr/lib/multipli/locales/"
-cp "${ROOT_DIR}/LICENSE" "${BUILD_ROOT}/usr/share/doc/multipli/copyright"
+# Format machine-readable copyright Debian DEP-5
+cat << EOF > "${BUILD_ROOT}/usr/share/doc/multipli/copyright"
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Multipli
+Upstream-Contact: Pierre <https://github.com/smilebob/multipli/issues>
+Source: https://github.com/smilebob/multipli
+
+Files: *
+Copyright: 2026 Pierre & Contributors
+License: Apache-2.0
+
+License: Apache-2.0
+EOF
+cat "${ROOT_DIR}/LICENSE" >> "${BUILD_ROOT}/usr/share/doc/multipli/copyright"
+cp "${ROOT_DIR}/LICENSE" "${BUILD_ROOT}/usr/share/doc/multipli/LICENSE"
 cp "${ROOT_DIR}/README.md" "${BUILD_ROOT}/usr/share/doc/multipli/"
 
 # Lanceur dans /usr/bin/multipli

@@ -40,6 +40,13 @@ modules:
       - install -Dm644 data/org.gnome.Multipli.desktop /app/share/applications/org.gnome.Multipli.desktop
       - install -Dm644 data/icons/org.gnome.Multipli.svg /app/share/icons/hicolor/scalable/apps/org.gnome.Multipli.svg
       - install -Dm644 data/org.gnome.Multipli.metainfo.xml /app/share/metainfo/org.gnome.Multipli.metainfo.xml
+
+      # Documentation et Licence
+      - install -d /app/share/doc/org.gnome.Multipli
+      - install -d /app/share/licenses/org.gnome.Multipli
+      - install -Dm644 LICENSE /app/share/licenses/org.gnome.Multipli/LICENSE
+      - install -Dm644 LICENSE /app/share/doc/org.gnome.Multipli/copyright
+      - install -Dm644 README.md /app/share/doc/org.gnome.Multipli/README.md
     sources:
       - type: dir
         path: ../../
