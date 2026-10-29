@@ -19,6 +19,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
+            python3 \
             python3-gi \
             gir1.2-gtk-4.0 \
             gir1.2-adw-1 \
@@ -27,11 +28,6 @@ jobs:
             gstreamer1.0-plugins-good \
             gstreamer1.0-tools \
             xvfb
-
-      - name: Configurer Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
 
       - name: Exécuter la suite de tests sous Xvfb
         run: |

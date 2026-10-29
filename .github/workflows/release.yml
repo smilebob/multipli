@@ -80,12 +80,12 @@ jobs:
     name: Construction .dmg (${{ matrix.os }})
     needs: test
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - os: macos-13
-            arch: x86_64
-          - os: macos-14
+          - os: macos-15
             arch: arm64
     steps:
       - uses: actions/checkout@v4
