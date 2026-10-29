@@ -52,29 +52,25 @@ jobs:
           path: dist/*.deb
 
   build-flatpak:
-    name: Construction Flatpak
+    name: Construction Flatpak (.flatpak)
     needs: test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-47
+      options: --privileged
     steps:
       - uses: actions/checkout@v4
-      - name: Installer Flatpak Builder
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder elfutils
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-      - name: Construire le bundle Flatpak
-        run: |
-          mkdir -p dist
-          ./packaging/flatpak/build_flatpak.sh || true
-          # Fallback si le runtime n'est pas encore téléchargé
-          if [ ! -f "dist/org.gnome.Multipli.flatpak" ]; then
-            tar -czf dist/org.gnome.Multipli-flatpak-manifest.tar.gz packaging/flatpak/ data/
-          fi
-      - name: Archiver le Flatpak
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: org.gnome.Multipli.flatpak
+          manifest-path: packaging/flatpak/org.gnome.Multipli.yml
+          branch: stable
+          arch: x86_64
+      - name: Archiver le bundle Flatpak
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-bundle
-          path: dist/*flatpak*
+          path: org.gnome.Multipli.flatpak
 
   build-macos:
     name: Construction .dmg (${{ matrix.os }})
